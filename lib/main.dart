@@ -17,9 +17,21 @@ class MyApp extends HookWidget {
         appBar: AppBar(title: const Text("Spell Check Example")),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            controller: useSpellCheckController(locale: const Locale('en')),
-            maxLines: 7,
+          child: Column(
+            children: [
+              TextField(
+                controller: useSpellCheckController(locale: const Locale('en')),
+                maxLines: 7,
+              ),
+              TextField(
+                controller: useSpellCheckController(locale: const Locale('en')),
+                maxLines: 7,
+              ),
+              TextField(
+                controller: useSpellCheckController(locale: const Locale('en')),
+                maxLines: 7,
+              ),
+            ],
           ),
         ),
       ),

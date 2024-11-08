@@ -57,14 +57,16 @@ class SpellCheckController extends TextEditingController {
             decorationColor: Colors.red,
             decorationStyle: TextDecorationStyle.wavy,
           ),
-          recognizer: TapGestureRecognizer()
-            ..onTapDown = (details) {
+          recognizer: DoubleTapGestureRecognizer()
+            ..onDoubleTapDown = (details) {
               _showSuggestionsOverlay(
                 context: context,
                 items: [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     enabled: false,
-                    child: Text('Replace with:'),
+                    child: Text(mistake.suggestions.isNotEmpty
+                        ? 'Replace with:'
+                        : 'No suggestions'),
                   ),
                   ...mistake.suggestions
                       .map<PopupMenuItem<VoidCallback>>((suggestion) {
@@ -264,16 +266,16 @@ class SpellCheckController extends TextEditingController {
     GlobalKey? atWidget,
   }) {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final RenderBox button = atWidget == null
+    final RenderBox widget = atWidget == null
         ? context.findRenderObject()! as RenderBox
         : atWidget.currentContext!.findRenderObject()! as RenderBox;
     final RenderBox overlay =
         Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final Offset offset = Offset(0.0, button.size.height);
+    final Offset offset = Offset(0.0, widget.size.height);
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
-        button.localToGlobal(offset, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero) + offset,
+        widget.localToGlobal(offset, ancestor: overlay),
+        widget.localToGlobal(widget.size.bottomRight(Offset.zero) + offset,
             ancestor: overlay),
       ),
       Offset.zero & overlay.size,

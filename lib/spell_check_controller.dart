@@ -11,7 +11,7 @@ import 'package:flutter_levenshtein_distance_spell_check_demo/models/mistake.dar
 class SpellCheckController extends TextEditingController {
   List<Mistake> mistakes = [];
   Timer? timer;
-  final Locale locale;
+  Locale locale = const Locale('en');
   final Set<String> checkedWords = {}; // Set to store checked words
 
   SpellCheckController({this.locale = const Locale('en')})

@@ -9,9 +9,9 @@ import 'package:flutter_levenshtein_distance_spell_check_demo/es.dart';
 /// Spelling checker controller that extends TextEditingController
 class SpellCheckController extends TextEditingController {
   List<Mistake> mistakes = [];
-  OverlayEntry? _overlayEntry;
   Timer? timer;
   final Locale locale;
+  final Set<String> checkedWords = {}; // Set to store checked words
 
   SpellCheckController({this.locale = const Locale('en')})
       : assert(locale == const Locale('en') || locale == const Locale('es'),
@@ -21,6 +21,7 @@ class SpellCheckController extends TextEditingController {
   @override
   set value(TextEditingValue newValue) {
     super.value = newValue;
+
     timer?.cancel();
     timer = Timer(const Duration(milliseconds: 600), () {
       _checkSpelling(newValue.text);
@@ -57,7 +58,22 @@ class SpellCheckController extends TextEditingController {
           ),
           recognizer: TapGestureRecognizer()
             ..onTapDown = (details) {
-              _showSuggestionsOverlay(context, mistake);
+              _showSuggestionsOverlay(
+                context: context,
+                items: [
+                  const PopupMenuItem(
+                    enabled: false,
+                    child: Text('Replace with:'),
+                  ),
+                  ...mistake.suggestions
+                      .map<PopupMenuItem<VoidCallback>>((suggestion) {
+                    return PopupMenuItem(
+                      value: () => _replaceMistake(mistake, suggestion),
+                      child: Text(suggestion),
+                    );
+                  }).toList(),
+                ],
+              );
             },
         ),
       );
@@ -98,7 +114,7 @@ class SpellCheckController extends TextEditingController {
     List<int> v0 = List<int>.filled(t.length + 1, 0);
     List<int> v1 = List<int>.filled(t.length + 1, 0);
 
-    for (int i = 0; i < t.length + 1; i < i++) {
+    for (int i = 0; i < t.length + 1; i++) {
       v0[i] = i;
     }
 
@@ -120,22 +136,19 @@ class SpellCheckController extends TextEditingController {
 
   /// Checks spelling and generates suggestions
   void _checkSpelling(String text) {
-    // Clear previous mistakes and overlay
-    mistakes.clear();
-    try {
-      _overlayEntry?.remove();
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-    _overlayEntry = null;
-
     // Find new mistakes
-    mistakes = _findMistakes(text);
+    mistakes = [
+      ...mistakes,
+      ..._findMistakes(text)
+          .map((e) => mistakes.contains(e) ? null : e)
+          .where((e) => e != null)
+          .cast<Mistake>(),
+    ]..sort((a, b) => a.offset.compareTo(b.offset));
     notifyListeners();
   }
 
   List<Mistake> _findMistakes(String text) {
-    List<Mistake> mistakes = [];
+    List<Mistake> results = [];
 
     // Select dictionary based on language
     final words = locale.languageCode == 'en' ? enWords1 : esWords1;
@@ -157,6 +170,11 @@ class SpellCheckController extends TextEditingController {
         final match = wordMatches[j];
         final word = match.group(0)!;
         final lowercasedWord = word.toLowerCase();
+
+        // Skip if the word has already been checked
+        if (checkedWords.contains(lowercasedWord)) {
+          continue;
+        }
 
         // Perform spell check if word is not in dictionary
         if (!dictionary.contains(lowercasedWord)) {
@@ -187,7 +205,7 @@ class SpellCheckController extends TextEditingController {
               .toList();
 
           // Add to the list of mistakes with correct offset in the original text
-          mistakes.add(
+          results.add(
             Mistake(
               offset: sentenceMatch.start + match.start,
               length: word.length,
@@ -195,9 +213,12 @@ class SpellCheckController extends TextEditingController {
             ),
           );
         }
+
+        // Add the word to the checked words set
+        checkedWords.add(lowercasedWord);
       }
     }
-    return mistakes;
+    return results;
   }
 
   /// Replaces the mistake with the selected suggestion
@@ -215,104 +236,73 @@ class SpellCheckController extends TextEditingController {
       replacement,
     );
 
+    // Calculate the difference in length between the mistake and the replacement
+    int offsetDifference = replacement.length - mistake.length;
+
     value = TextEditingValue(
       text: newText,
       selection:
           TextSelection.collapsed(offset: mistake.offset + replacement.length),
     );
 
+    // Adjust the offset of all mistakes after the current one
+    for (var m in mistakes) {
+      if (m.offset > mistake.offset) {
+        m.offset += offsetDifference; // 调整 `offset`
+      }
+    }
+
+    // Add the replacement to the checked words set
+    checkedWords.add(replacement.toLowerCase());
     mistakes.remove(mistake);
+    // notifyListeners();
   }
 
-  /// Shows suggestions overlay
-  void _showSuggestionsOverlay(BuildContext context, Mistake mistake) {
-    final overlay = Overlay.of(context);
-    final renderBox = context.findRenderObject() as RenderBox;
-    final position = renderBox.localToGlobal(Offset.zero);
-
-    try {
-      _overlayEntry?.remove();
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-    _overlayEntry = OverlayEntry(
-      builder: (context) {
-        return Stack(
-          children: [
-            // This GestureDetector dismisses the overlay when tapping outside
-            GestureDetector(
-              onTap: () {
-                _overlayEntry?.remove();
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                color: Colors.transparent,
-              ),
-            ),
-            Positioned(
-              left: position.dx,
-              top: position.dy + renderBox.size.height,
-              child: Material(
-                elevation: 4.0,
-                child: _PopUpMenu(
-                  mistake: mistake,
-                  onReplace: (suggestion) {
-                    _replaceMistake(mistake, suggestion);
-                    _overlayEntry?.remove();
-                  },
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+  _showSuggestionsOverlay({
+    required BuildContext context,
+    required List<PopupMenuEntry<VoidCallback>> items,
+    GlobalKey? atWidget,
+  }) {
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
+    final RenderBox button = atWidget == null
+        ? context.findRenderObject()! as RenderBox
+        : atWidget.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox overlay =
+        Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final Offset offset = Offset(0.0, button.size.height);
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(offset, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero) + offset,
+            ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
     );
-
-    overlay.insert(_overlayEntry!);
+    // Only show the menu if there is something to show
+    if (items.isNotEmpty) {
+      showMenu<VoidCallback?>(
+        context: context,
+        elevation: popupMenuTheme.elevation,
+        items: items,
+        position: position,
+        shape: popupMenuTheme.shape,
+        color: popupMenuTheme.color,
+      ).then<void>((VoidCallback? newValue) {
+        newValue?.call();
+      });
+    }
   }
 }
 
 /// Mistake class to store misspelled words and their suggestions
 class Mistake {
-  final int offset;
-  final int length;
-  final List<String> suggestions;
+  int offset;
+  int length;
+  List<String> suggestions;
 
   Mistake({
     required this.offset,
     required this.length,
     required this.suggestions,
   });
-}
-
-class _PopUpMenu extends StatelessWidget {
-  const _PopUpMenu({required this.mistake, required this.onReplace});
-  final Mistake mistake;
-  final void Function(String suggestion) onReplace;
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint(MediaQuery.of(context).size.height.toString());
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 200),
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height < 560
-            ? MediaQuery.of(context).size.height * 0.6
-            : null,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: mistake.suggestions.isNotEmpty
-                ? mistake.suggestions.map((suggestion) {
-                    return ListTile(
-                      title: Text(suggestion),
-                      onTap: () => onReplace(suggestion),
-                    );
-                  }).toList()
-                : [const ListTile(title: Text("No suggestions"))],
-          ),
-        ),
-      ),
-    );
-  }
 }

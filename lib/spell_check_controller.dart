@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_levenshtein_distance_spell_check_demo/en.dart';
 import 'package:flutter_levenshtein_distance_spell_check_demo/es.dart';
+import 'package:flutter_levenshtein_distance_spell_check_demo/models/mistake.dart';
 
 /// Spelling checker controller that extends TextEditingController
 class SpellCheckController extends TextEditingController {
@@ -246,10 +247,9 @@ class SpellCheckController extends TextEditingController {
     );
 
     // Adjust the offset of all mistakes after the current one
-    for (var m in mistakes) {
-      if (m.offset > mistake.offset) {
-        m.offset += offsetDifference; // 调整 `offset`
-      }
+    for (int i = mistakes.indexOf(mistake) + 1; i < mistakes.length; i++) {
+      mistakes[i] =
+          mistakes[i].copyWith(offset: mistakes[i].offset + offsetDifference);
     }
 
     // Add the replacement to the checked words set
@@ -292,17 +292,4 @@ class SpellCheckController extends TextEditingController {
       });
     }
   }
-}
-
-/// Mistake class to store misspelled words and their suggestions
-class Mistake {
-  int offset;
-  int length;
-  List<String> suggestions;
-
-  Mistake({
-    required this.offset,
-    required this.length,
-    required this.suggestions,
-  });
 }

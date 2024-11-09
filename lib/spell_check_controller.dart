@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_levenshtein_distance_spell_check_demo/models/mistake.dart';
-import 'package:flutter_levenshtein_distance_spell_check_demo/spell_check_finder/spell_check_finder_mobile.dart';
+import 'package:flutter_levenshtein_distance_spell_check_demo/spell_check_finder/spell_check_finder.dart';
 
 import 'en.dart';
 import 'es.dart';

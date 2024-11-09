@@ -2,11 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_levenshtein_distance_spell_check_demo/models/mistake.dart';
-
-typedef SpellCheckResult = ({
-  List<Mistake> newMistakes,
-  Set<String> newCheckedWords
-});
+import 'package:flutter_levenshtein_distance_spell_check_demo/spell_check_finder/result.dart';
 
 /// Spell checker class that uses Levenshtein distance to find mistakes
 class SpellCheckFinder {

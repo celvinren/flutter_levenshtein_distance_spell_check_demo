@@ -15,16 +15,17 @@ const trustedWorkerUrl = window.policy ? window.policy.createScriptURL(workerUrl
 const worker = new Worker(trustedWorkerUrl);
 
 worker.onmessage = function (event) {
-    // // When Web Worker got a return value, send the result to Flutter
-    // window.workerResult = event.data;
-    // Dispatch an event with the result map
-    const result = event.data;
-    const customEvent = new CustomEvent('newResult', { detail: result });
+    const { id, newMistakes, newCheckedWords } = event.data;
+    const customEvent = new CustomEvent(`newResult_${id}`, {
+        detail: {
+            newMistakes,
+            newCheckedWords,
+        }
+    });
     window.resultEmitter.dispatchEvent(customEvent);
-    // console.log('Event dispatched with result:', result);
 };
 
 // Expose postMessage function in Web Worker to Flutter
-window.postMessageToFindMistakesWorker = function (text, dictionary, checkedWords) {
-    worker.postMessage({ text: text, dictionary: dictionary, checkedWords: checkedWords });
+window.postMessageToFindMistakesWorker = function (id, text, dictionary, checkedWords) {
+    worker.postMessage({ id: id, text: text, dictionary: dictionary, checkedWords: checkedWords });
 };

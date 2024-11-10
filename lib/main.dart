@@ -23,14 +23,14 @@ class MyApp extends HookWidget {
                 controller: useSpellCheckController(locale: const Locale('en')),
                 maxLines: 7,
               ),
-              // TextField(
-              //   controller: useSpellCheckController(locale: const Locale('en')),
-              //   maxLines: 7,
-              // ),
-              // TextField(
-              //   controller: useSpellCheckController(locale: const Locale('en')),
-              //   maxLines: 7,
-              // ),
+              TextField(
+                controller: useSpellCheckController(locale: const Locale('en')),
+                maxLines: 7,
+              ),
+              TextField(
+                controller: useSpellCheckController(locale: const Locale('en')),
+                maxLines: 7,
+              ),
             ],
           ),
         ),

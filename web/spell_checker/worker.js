@@ -1,9 +1,10 @@
 self.onmessage = async function (event) {
-    const { text, dictionary, checkedWords } = event.data;
+    const { text, dictionary, checkedWords, id } = event.data;
     // console.log('text', text);
     // console.log('dictionary', dictionary.length);
     // console.log('checkedWords', checkedWords.length);
     const result = findMistakes(text, dictionary, checkedWords);
+    result.id = id;
     self.postMessage(result);
 }
 

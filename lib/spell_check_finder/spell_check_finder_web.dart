@@ -4,6 +4,7 @@ import 'dart:js_util' as js_util;
 
 import 'package:flutter_levenshtein_distance_spell_check_demo/models/mistake.dart';
 import 'package:flutter_levenshtein_distance_spell_check_demo/spell_check_finder/result.dart';
+import 'package:uuid/uuid.dart';
 
 class SpellCheckFinder {
   final StreamController<SpellCheckResult> _controller =
@@ -12,12 +13,14 @@ class SpellCheckFinder {
   SpellCheckFinder() {
     _startListening();
   }
-
+  final String id = const Uuid().v4();
   Stream<SpellCheckResult> get stream => _controller.stream;
 
   void _startListening() {
+    final eventType = 'newResult_$id';
+
     js.context['resultEmitter'].callMethod('addEventListener', [
-      'newResult',
+      eventType,
       js.allowInterop((event) {
         // Retrieve the JavaScript object and convert it to a Dart map
         final jsResult = js_util.getProperty(event, 'detail');
@@ -59,7 +62,7 @@ class SpellCheckFinder {
     final jsDictionary = js.JsObject.jsify(dictionary);
     final jsCheckedWords = js.JsObject.jsify(checkedWords.toList());
     js.context.callMethod('postMessageToFindMistakesWorker',
-        [text, jsDictionary, jsCheckedWords]);
+        [id, text, jsDictionary, jsCheckedWords]);
   }
 
   void dispose() {

@@ -1,7 +1,13 @@
-// JavaScript: Define an EventTarget for streaming results
-window.resultEmitter = new EventTarget();
+self.onmessage = async function (event) {
+    const { text, dictionary, checkedWords } = event.data;
+    // console.log('text', text);
+    // console.log('dictionary', dictionary.length);
+    // console.log('checkedWords', checkedWords.length);
+    const result = findMistakes(text, dictionary, checkedWords);
+    self.postMessage(result);
+}
 
-window.postMessageToFindMistakesWorker = async function (text, dictionary, checkedWords) {
+function findMistakes(text, dictionary, checkedWords) {
     try {
         // Update dictionaryList if a new dictionary is provided
         if (Array.isArray(dictionary) && dictionary.length > 0) {
@@ -24,10 +30,11 @@ window.postMessageToFindMistakesWorker = async function (text, dictionary, check
         //     processedText: processedText
         // };
         const result = findMistakes(text, window.dictionaryList, checkedWords);
-
+        return result;
         // Dispatch an event with the result map
-        const event = new CustomEvent('newResult', { detail: result });
-        window.resultEmitter.dispatchEvent(event);
+        // const event = new CustomEvent('newResult', { detail: result });
+        // window.resultEmitter.dispatchEvent(event);
+        // console.log('Event dispatched with result:', result);
 
     } catch (error) {
         console.error('Error in processing:', error);
@@ -113,12 +120,3 @@ function findMistakes(text, dictionary, checkedWords) {
         newCheckedWords: Array.from(newCheckedWords)
     };
 }
-
-
-// // Example usage
-// const text = "This is some smple txt for testng the spellcheker.";
-// const dictionary = ["this", "is", "some", "sample", "text", "for", "testing", "the", "spellchecker"];
-// const checkedWords = new Set(["this", "is"]); // Initialize with some pre-checked words
-
-// const result = findMistakes(text, dictionary, checkedWords);
-// console.log(result);

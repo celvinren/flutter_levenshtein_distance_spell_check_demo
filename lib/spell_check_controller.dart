@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_levenshtein_distance_spell_check_demo/models/mistake.dart';
-import 'package:flutter_levenshtein_distance_spell_check_demo/spell_check_finder/spell_check_finder.dart';
 
 import 'en.dart';
 import 'es.dart';
+import 'models/mistake.dart';
+import 'spell_check_finder/spell_check_finder.dart';
 
 /// Spelling checker controller that extends TextEditingController
 class SpellCheckController extends TextEditingController {
@@ -33,6 +33,12 @@ class SpellCheckController extends TextEditingController {
   @override
   set value(TextEditingValue newValue) {
     super.value = newValue;
+    if (text.isEmpty) {
+      mistakes = [];
+      checkedWords = {};
+      notifyListeners();
+      return;
+    }
 
     timer?.cancel();
     timer = Timer(const Duration(milliseconds: 600), () {

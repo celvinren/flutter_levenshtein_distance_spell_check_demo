@@ -34,6 +34,7 @@ class SpellCheckFinder {
           return Mistake.fromJson({
             'offset': js_util.getProperty(e, 'offset'),
             'length': js_util.getProperty(e, 'length'),
+            'word': js_util.getProperty(e, 'word'),
             'suggestions':
                 List<String>.from(js_util.getProperty(e, 'suggestions')),
           });

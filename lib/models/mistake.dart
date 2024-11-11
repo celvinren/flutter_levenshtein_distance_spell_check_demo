@@ -8,6 +8,7 @@ class Mistake with _$Mistake {
   factory Mistake({
     required int offset,
     required int length,
+    required String word,
     required List<String> suggestions,
   }) = _Mistake;
 

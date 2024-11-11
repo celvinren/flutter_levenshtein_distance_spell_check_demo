@@ -83,6 +83,7 @@ class SpellCheckFinder {
             Mistake(
               offset: sentences[i].start + match.start,
               length: word.length,
+              word: word,
               suggestions: suggestions,
             ),
           );

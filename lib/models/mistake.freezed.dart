@@ -22,6 +22,7 @@ Mistake _$MistakeFromJson(Map<String, dynamic> json) {
 mixin _$Mistake {
   int get offset => throw _privateConstructorUsedError;
   int get length => throw _privateConstructorUsedError;
+  String get word => throw _privateConstructorUsedError;
   List<String> get suggestions => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -34,7 +35,7 @@ abstract class $MistakeCopyWith<$Res> {
   factory $MistakeCopyWith(Mistake value, $Res Function(Mistake) then) =
       _$MistakeCopyWithImpl<$Res, Mistake>;
   @useResult
-  $Res call({int offset, int length, List<String> suggestions});
+  $Res call({int offset, int length, String word, List<String> suggestions});
 }
 
 /// @nodoc
@@ -52,6 +53,7 @@ class _$MistakeCopyWithImpl<$Res, $Val extends Mistake>
   $Res call({
     Object? offset = null,
     Object? length = null,
+    Object? word = null,
     Object? suggestions = null,
   }) {
     return _then(_value.copyWith(
@@ -63,6 +65,10 @@ class _$MistakeCopyWithImpl<$Res, $Val extends Mistake>
           ? _value.length
           : length // ignore: cast_nullable_to_non_nullable
               as int,
+      word: null == word
+          ? _value.word
+          : word // ignore: cast_nullable_to_non_nullable
+              as String,
       suggestions: null == suggestions
           ? _value.suggestions
           : suggestions // ignore: cast_nullable_to_non_nullable
@@ -78,7 +84,7 @@ abstract class _$$MistakeImplCopyWith<$Res> implements $MistakeCopyWith<$Res> {
       __$$MistakeImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int offset, int length, List<String> suggestions});
+  $Res call({int offset, int length, String word, List<String> suggestions});
 }
 
 /// @nodoc
@@ -94,6 +100,7 @@ class __$$MistakeImplCopyWithImpl<$Res>
   $Res call({
     Object? offset = null,
     Object? length = null,
+    Object? word = null,
     Object? suggestions = null,
   }) {
     return _then(_$MistakeImpl(
@@ -105,6 +112,10 @@ class __$$MistakeImplCopyWithImpl<$Res>
           ? _value.length
           : length // ignore: cast_nullable_to_non_nullable
               as int,
+      word: null == word
+          ? _value.word
+          : word // ignore: cast_nullable_to_non_nullable
+              as String,
       suggestions: null == suggestions
           ? _value._suggestions
           : suggestions // ignore: cast_nullable_to_non_nullable
@@ -119,6 +130,7 @@ class _$MistakeImpl implements _Mistake {
   _$MistakeImpl(
       {required this.offset,
       required this.length,
+      required this.word,
       required final List<String> suggestions})
       : _suggestions = suggestions;
 
@@ -129,6 +141,8 @@ class _$MistakeImpl implements _Mistake {
   final int offset;
   @override
   final int length;
+  @override
+  final String word;
   final List<String> _suggestions;
   @override
   List<String> get suggestions {
@@ -139,7 +153,7 @@ class _$MistakeImpl implements _Mistake {
 
   @override
   String toString() {
-    return 'Mistake(offset: $offset, length: $length, suggestions: $suggestions)';
+    return 'Mistake(offset: $offset, length: $length, word: $word, suggestions: $suggestions)';
   }
 
   @override
@@ -149,13 +163,14 @@ class _$MistakeImpl implements _Mistake {
             other is _$MistakeImpl &&
             (identical(other.offset, offset) || other.offset == offset) &&
             (identical(other.length, length) || other.length == length) &&
+            (identical(other.word, word) || other.word == word) &&
             const DeepCollectionEquality()
                 .equals(other._suggestions, _suggestions));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, offset, length,
+  int get hashCode => Object.hash(runtimeType, offset, length, word,
       const DeepCollectionEquality().hash(_suggestions));
 
   @JsonKey(ignore: true)
@@ -176,6 +191,7 @@ abstract class _Mistake implements Mistake {
   factory _Mistake(
       {required final int offset,
       required final int length,
+      required final String word,
       required final List<String> suggestions}) = _$MistakeImpl;
 
   factory _Mistake.fromJson(Map<String, dynamic> json) = _$MistakeImpl.fromJson;
@@ -184,6 +200,8 @@ abstract class _Mistake implements Mistake {
   int get offset;
   @override
   int get length;
+  @override
+  String get word;
   @override
   List<String> get suggestions;
   @override

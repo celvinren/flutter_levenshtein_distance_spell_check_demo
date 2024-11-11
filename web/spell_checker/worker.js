@@ -107,6 +107,7 @@ function findMistakes(text, dictionary, checkedWords) {
                 results.push({
                     offset: text.indexOf(match[0]), // Calculate offset in the original text
                     length: match[0].length,
+                    word: match[0],
                     suggestions: potentialSuggestions
                 });
             }

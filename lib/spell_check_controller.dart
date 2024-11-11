@@ -38,6 +38,23 @@ class SpellCheckController extends TextEditingController {
       checkedWords = {};
       notifyListeners();
       return;
+    } else {
+      final removedMistakes = mistakes
+          .where((e) {
+            try {
+              final word = text.substring(e.offset, e.offset + e.length);
+              return word != e.word;
+            } catch (e) {
+              return true;
+            }
+          })
+          .toList()
+          .map((e) => e.word.toLowerCase())
+          .toList();
+      mistakes.removeWhere((e) => removedMistakes.contains(e.word));
+      checkedWords.removeWhere((e) => removedMistakes.contains(e));
+
+      notifyListeners();
     }
 
     timer?.cancel();
